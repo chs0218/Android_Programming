@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">카드게임</string>
+    <string name="same_card_toast">같은 카드!</string>
+    <string name="score_flips_fmt">%d 번 뒤집었습니다</string>
+    <string name="restart_dlg_title">다시 시작</string>
+    <string name="restart_dlg_msg">진짜로 다시 시작하겠습니까?</string>
+    <string name="common_yes">네</string>
+    <string name="common_no">아니요</string>
+    <string name="restart">다시하기</string>
+</resources>
