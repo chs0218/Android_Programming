@@ -1,6 +1,7 @@
 package com.example.skeleton;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.RectF;
 
@@ -13,17 +14,17 @@ public class Ball implements IGameObject{
         this.dx = dx;
         this.dy = dy;
         dstRect.set(0, 0, 2.5f, 2.5f);
-    }
 
-    public static void setBitmap(Bitmap bitmap) {
-        Ball.bitmap = bitmap;
+        if(bitmap == null){
+            bitmap = BitmapFactory.decodeResource(GameView.res, R.mipmap.soccer_ball_240);
+        }
     }
 
     @Override
     public void update() {
-        dstRect.offset(dx, dy);
+        dstRect.offset(dx * BaseScene.frameTime, dy * BaseScene.frameTime);
         if (dx > 0) {
-            if (dstRect.right > 10.0f) {
+            if (dstRect.right > Metrics.game_width) {
                 dx = -dx;
             }
         } else {
@@ -32,7 +33,7 @@ public class Ball implements IGameObject{
             }
         }
         if (dy > 0) {
-            if (dstRect.bottom > 15.0) {
+            if (dstRect.bottom > Metrics.game_height) {
                 dy = -dy;
             }
         } else {
