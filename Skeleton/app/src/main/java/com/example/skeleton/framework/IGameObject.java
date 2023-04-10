@@ -1,4 +1,4 @@
-package com.example.skeleton;
+package com.example.skeleton.framework;
 
 import android.graphics.Canvas;
 

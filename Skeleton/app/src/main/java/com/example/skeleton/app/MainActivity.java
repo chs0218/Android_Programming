@@ -1,8 +1,11 @@
-package com.example.skeleton;
+package com.example.skeleton.app;
 
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.skeleton.game.MainScene;
+import com.example.skeleton.R;
 
 public class MainActivity extends AppCompatActivity {
 

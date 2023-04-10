@@ -1,30 +1,29 @@
-package com.example.skeleton;
+package com.example.skeleton.game;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.RectF;
 
-public class Fighter implements IGameObject{
+import com.example.skeleton.R;
+import com.example.skeleton.framework.BaseScene;
+import com.example.skeleton.framework.BitmapPool;
+import com.example.skeleton.framework.Sprite;
+
+public class Fighter extends Sprite {
     private static final float RADIUS = 1.25f;
-    private Bitmap bitmap, targetBitmap;
-    private float x, y; // 현재 위치
+    private static final float FIRE_INTERVAL = 0.5f;
+    private Bitmap targetBitmap;
     private float tx, ty; // touch event 를 받은 위치. 이 위치를 향해서 움직인다
     private float dx, dy; // 1초간 움직여야 할 양: dx = SPEED*cos(r); dy = SPEED*sin(r);
     private static float SPEED = 10.0f;
     private float angle;
-
-    private RectF dstRect = new RectF();
+    private float accumulatedTime;
     private RectF targetRect = new RectF();
 
     public Fighter() {
-        x = tx = 4.5f;
-        y = ty = 12.0f;
-        dx = dy = 0;
-        dstRect.set(x-RADIUS, y-RADIUS, x+RADIUS, y+RADIUS);
-
-        bitmap = BitmapFactory.decodeResource(GameView.res, R.mipmap.plane_240);
-        targetBitmap = BitmapFactory.decodeResource(GameView.res, R.mipmap.target);
+        super(R.mipmap.plane_240, 4.5f, 12.0f, 2*RADIUS, 2*RADIUS);
+        tx = x; ty = y; dx = dy = 0;
+        targetBitmap = BitmapPool.get(R.mipmap.target);
     }
 
     @Override
@@ -38,7 +37,8 @@ public class Fighter implements IGameObject{
         if ((dy > 0 && y > ty) || (dy < 0 && y < ty)) {
             y = ty; dy = 0;
         }
-        dstRect.set(x-RADIUS, y-RADIUS, x+RADIUS, y+RADIUS);
+        fixDstRect();
+        checkFire();
     }
 
     @Override
@@ -64,5 +64,18 @@ public class Fighter implements IGameObject{
         this.dx = (float) (SPEED * Math.cos(radian));
         this.dy = (float) (SPEED * Math.sin(radian));
         angle = (float) Math.toDegrees(radian) + 90;
+    }
+    private void checkFire() {
+        accumulatedTime += BaseScene.frameTime;
+        if (accumulatedTime < FIRE_INTERVAL) {
+            return;
+        }
+
+        accumulatedTime -= FIRE_INTERVAL;
+        fire();
+    }
+    public void fire() {
+        Bullet bullet = new Bullet(x, y, angle);
+        BaseScene.getTopScene().add(bullet);
     }
 }

@@ -1,13 +1,16 @@
-package com.example.skeleton;
+package com.example.skeleton.game;
 
 import android.view.MotionEvent;
+
+import com.example.skeleton.framework.BaseScene;
+import com.example.skeleton.framework.Metrics;
 
 import java.util.Random;
 
 public class MainScene extends BaseScene {
     private Fighter fighter;
     public MainScene() {
-        Metrics.setGameSize(10.0f, 10.0f);
+        //Metrics.setGameSize(10.0f, 10.0f);
         Random r = new Random();
         for (int i = 0; i < 10; i++) {
             float dx = r.nextFloat() * 5.0f + 3.0f;
@@ -29,6 +32,9 @@ public class MainScene extends BaseScene {
                 float x = Metrics.toGameX(event.getX());
                 float y = Metrics.toGameY(event.getY());
                 fighter.setTargetPosition(x, y);
+//                if (action == MotionEvent.ACTION_DOWN) {
+//                    fighter.fire();
+//                }
                 return true;
         }
         return super.onTouchEvent(event);

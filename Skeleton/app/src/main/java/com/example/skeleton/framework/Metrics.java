@@ -1,4 +1,4 @@
-package com.example.skeleton;
+package com.example.skeleton.framework;
 
 public class Metrics {
     public static float scale = 1.0f;
