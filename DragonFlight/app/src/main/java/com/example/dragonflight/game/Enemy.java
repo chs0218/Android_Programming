@@ -1,15 +1,21 @@
 package com.example.dragonflight.game;
 
 import android.graphics.RectF;
+import android.util.Log;
 
 import com.example.dragonflight.R;
 import com.example.dragonflight.framework.AnimSprite;
 import com.example.dragonflight.framework.BaseScene;
+import com.example.dragonflight.framework.BitmapPool;
 import com.example.dragonflight.framework.IBoxCollidable;
+import com.example.dragonflight.framework.IRecyclable;
 import com.example.dragonflight.framework.Metrics;
+import com.example.dragonflight.framework.RecycleBin;
 import com.example.dragonflight.framework.Sprite;
 
-public class Enemy extends AnimSprite implements IBoxCollidable {
+import java.util.ArrayList;
+
+public class Enemy extends AnimSprite implements IBoxCollidable, IRecyclable {
 
     private static final int[] resIds = {
             R.mipmap.enemy_01, R.mipmap.enemy_02, R.mipmap.enemy_03, R.mipmap.enemy_04, R.mipmap.enemy_05,
@@ -21,11 +27,27 @@ public class Enemy extends AnimSprite implements IBoxCollidable {
     public static final int MAX_LEVEL = resIds.length - 1;
     private static final float SPEED = 2.0f;
     private static final float SIZE = 1.8f;
+    private int level;
+    private static final String TAG = Enemy.class.getSimpleName();
 
     protected RectF collisionRect = new RectF();
-
-    public Enemy(int index, int level) {
+    protected static ArrayList<Enemy> recycleBin = new ArrayList<>();
+    static Enemy get(int index, int level) {
+            Enemy enemy = (Enemy) RecycleBin.get(Enemy.class);
+            if (enemy != null) {
+            enemy.x = (Metrics.game_width / 10) * (2 * index + 1);
+            enemy.y = -SIZE;
+            if (level != enemy.level) {
+                enemy.level = level;
+                enemy.bitmap = BitmapPool.get(resIds[level]); // 오래된 버그. 재사용시 비트맵도 바꾸어 주어야 한다
+            }
+            return enemy;
+        }
+        return new Enemy(index, level);
+    }
+    private Enemy(int index, int level) {
         super(resIds[level], (Metrics.game_width / 10) * (2 * index + 1), -SIZE, SIZE, SIZE, 10.0f, 0);
+        this.level = level;
     }
 
     @Override
@@ -45,5 +67,13 @@ public class Enemy extends AnimSprite implements IBoxCollidable {
     @Override
     public RectF getCollisionRect() {
         return collisionRect;
+    }
+
+    @Override
+    public void onRecycle() {
+
+    }
+    public int getScore() {
+        return 10 * (level + 1);
     }
 }

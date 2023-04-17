@@ -1,4 +1,4 @@
-package com.example.dragonflight.game;
+package com.example.dragonflight.framework;
 
 import android.graphics.RectF;
 
