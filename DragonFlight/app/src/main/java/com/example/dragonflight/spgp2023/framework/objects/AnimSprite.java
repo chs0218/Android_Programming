@@ -1,11 +1,9 @@
-package com.example.dragonflight.framework;
+package com.example.dragonflight.spgp2023.framework.objects;
 
 import android.graphics.Canvas;
 import android.graphics.Rect;
 
-import androidx.lifecycle.ViewTreeLifecycleOwner;
-
-public class AnimSprite extends Sprite{
+public class AnimSprite extends Sprite {
     private static final String TAG = AnimSprite.class.getSimpleName();
 
     protected Rect srcRect = new Rect();

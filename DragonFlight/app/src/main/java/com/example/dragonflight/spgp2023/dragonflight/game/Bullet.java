@@ -1,41 +1,36 @@
-package com.example.dragonflight.game;
+package com.example.dragonflight.spgp2023.dragonflight.game;
 
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.RectF;
-import android.util.Log;
 
 import com.example.dragonflight.R;
-import com.example.dragonflight.framework.BaseScene;
-import com.example.dragonflight.framework.IBoxCollidable;
-import com.example.dragonflight.framework.IGameObject;
-import com.example.dragonflight.framework.IRecyclable;
-import com.example.dragonflight.framework.RecycleBin;
-import com.example.dragonflight.framework.Sprite;
-
-import java.util.ArrayList;
+import com.example.dragonflight.spgp2023.framework.scene.BaseScene;
+import com.example.dragonflight.spgp2023.framework.interfaces.IBoxCollidable;
+import com.example.dragonflight.spgp2023.framework.interfaces.IRecyclable;
+import com.example.dragonflight.spgp2023.framework.scene.RecycleBin;
+import com.example.dragonflight.spgp2023.framework.objects.Sprite;
 
 public class Bullet extends Sprite implements IBoxCollidable, IRecyclable {
     private static final float BULLET_WIDTH = 28 * 0.0243f;
     private static final float BULLET_HEIGHT = 40 * 0.0243f;
     private static final String TAG = Bullet.class.getSimpleName();
     protected static float SPEED = 20.0f;
-    protected static Paint paint;
+    protected int power;
 
-    public static Bullet get(float x, float y) {
+    public static Bullet get(float x, float y, int power) {
         Bullet bullet = (Bullet) RecycleBin.get(Bullet.class);
         if (bullet != null) {
             bullet.x = x;
             bullet.y = y;
+            bullet.power = power;
             return bullet;
         }
-        return new Bullet(x, y);
+        return new Bullet(x, y, power);
     }
-    private Bullet(float x, float y) {
+    private Bullet(float x, float y, int power) {
         super(R.mipmap.laser_1, x, y, BULLET_WIDTH, BULLET_HEIGHT);
         this.x = x;
         this.y = y;
+        this.power = power;
     }
     @Override
     public void update() {
@@ -44,7 +39,7 @@ public class Bullet extends Sprite implements IBoxCollidable, IRecyclable {
         fixDstRect();
 
         if (dstRect.bottom < 0) {
-            BaseScene.getTopScene().remove(this);
+            BaseScene.getTopScene().remove(MainScene.Layer.bullet, this);
         }
     }
 
@@ -56,5 +51,9 @@ public class Bullet extends Sprite implements IBoxCollidable, IRecyclable {
     @Override
     public void onRecycle() {
 
+    }
+
+    public int getPower() {
+        return power;
     }
 }

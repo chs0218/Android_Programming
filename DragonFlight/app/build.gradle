@@ -6,6 +6,10 @@ android {
     namespace 'com.example.dragonflight'
     compileSdk 33
 
+    viewBinding {
+        enabled = true
+    }
+
     defaultConfig {
         applicationId "com.example.dragonflight"
         minSdk 24

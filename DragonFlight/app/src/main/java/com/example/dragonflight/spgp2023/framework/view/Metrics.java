@@ -1,4 +1,4 @@
-package com.example.dragonflight.framework;
+package com.example.dragonflight.spgp2023.framework.view;
 
 public class Metrics {
     public static float scale = 1.0f;

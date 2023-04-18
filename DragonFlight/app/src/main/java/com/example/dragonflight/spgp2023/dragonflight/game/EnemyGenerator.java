@@ -1,10 +1,10 @@
-package com.example.dragonflight.game;
+package com.example.dragonflight.spgp2023.dragonflight.game;
 
 import android.graphics.Canvas;
 import android.util.Log;
 
-import com.example.dragonflight.framework.BaseScene;
-import com.example.dragonflight.framework.IGameObject;
+import com.example.dragonflight.spgp2023.framework.scene.BaseScene;
+import com.example.dragonflight.spgp2023.framework.interfaces.IGameObject;
 
 import java.util.Random;
 

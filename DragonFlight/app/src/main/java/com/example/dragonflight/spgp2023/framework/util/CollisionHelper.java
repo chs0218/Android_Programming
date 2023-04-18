@@ -1,9 +1,8 @@
-package com.example.dragonflight.framework;
+package com.example.dragonflight.spgp2023.framework.util;
 
 import android.graphics.RectF;
 
-import com.example.dragonflight.framework.IBoxCollidable;
-import com.example.dragonflight.framework.IGameObject;
+import com.example.dragonflight.spgp2023.framework.interfaces.IBoxCollidable;
 
 public class CollisionHelper {
     public static boolean collides(IBoxCollidable obj1, IBoxCollidable obj2){

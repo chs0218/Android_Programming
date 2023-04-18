@@ -1,13 +1,12 @@
-package com.example.dragonflight.app;
+package com.example.dragonflight.spgp2023.dragonflight.app;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 
-import com.example.dragonflight.R;
-import com.example.dragonflight.framework.BaseScene;
-import com.example.dragonflight.framework.GameView;
-import com.example.dragonflight.game.MainScene;
+import com.example.dragonflight.spgp2023.framework.scene.BaseScene;
+import com.example.dragonflight.spgp2023.framework.view.GameView;
+import com.example.dragonflight.spgp2023.dragonflight.game.MainScene;
 
 public class MainActivity extends AppCompatActivity {
     private GameView gameView;
@@ -15,6 +14,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         gameView = new GameView(this);
+        gameView.setFullScreen();
         setContentView(gameView);
 
         new MainScene().pushScene();
