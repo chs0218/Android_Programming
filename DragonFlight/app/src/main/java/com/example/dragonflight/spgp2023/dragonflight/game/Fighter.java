@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.util.Log;
 
 import com.example.dragonflight.R;
 import com.example.dragonflight.spgp2023.framework.scene.BaseScene;
@@ -20,6 +21,8 @@ public class Fighter extends Sprite {
     private static final float SPEED = 10.0f;
     private static final float FIGHTER_LEFT = FIGHTER_WIDTH / 2;
     private static final float FIGHTER_RIGHT = 9.0f - FIGHTER_WIDTH / 2;
+    private static final String TAG = Fighter.class.getSimpleName();
+
 
     private Bitmap sparkBitmap;
     private RectF sparkRect = new RectF();
@@ -32,6 +35,9 @@ public class Fighter extends Sprite {
     private static final float FIRE_INTERVAL = 0.25f;
     private static final float SPARK_DURATION = 0.1f;
     private float accumulatedTime;
+
+    private static final float MAX_ROLL_TIME = 0.4f;
+    private float rollTime;
 
     private static final Rect[] rects = new Rect[] {
             new Rect(  8, 0,   8 + 42, 80),
@@ -98,12 +104,31 @@ public class Fighter extends Sprite {
         if (x > FIGHTER_RIGHT) x = tx = FIGHTER_RIGHT;
 
         fixDstRect();
+
+        int sign = tx < x ? -1 : x < tx ? 1 : 0; // roll 을 변경시킬 부호를 정한다
+        if (x == tx) {                         // 비행기가 멈췄을 때
+            if (rollTime > 0) sign = -1;         // 오른쪽으로 움직이고 있었다면 감소시킨다
+            else if (rollTime < 0) sign = 1;     // 왼쪽으로 움직이고 있었다면 증가시킨다
+        }
+        rollTime += sign * time;
+        if (x == tx) {                           // 비행기가 멈췄을 때
+            if (sign < 0 && rollTime < 0) rollTime = 0; // 감소중이었는데 0 을 지나쳤다면 0으로
+            if (sign > 0 && rollTime > 0) rollTime = 0; // 증가중이었는데 0 을 지나쳤다면 0으로
+        }
+        if (rollTime < -MAX_ROLL_TIME) rollTime = -MAX_ROLL_TIME;    // 최대 MAX_ROLL_TIME 까지만
+        else if (rollTime > MAX_ROLL_TIME) rollTime = MAX_ROLL_TIME;
+
+        if (rollTime != 0) {
+            Log.v(TAG, "RollTime = " + rollTime);
+        }
+
         checkFire();
     }
 
     @Override
     public void draw(Canvas canvas) {
-        canvas.drawBitmap(bitmap, rects[5], dstRect, null);
+        int rollIndex = 5 + (int)(rollTime * 5 / MAX_ROLL_TIME);
+        canvas.drawBitmap(bitmap, rects[rollIndex], dstRect, null);
         if (tx != x) {
             canvas.drawBitmap(targetBitmap, null, targetRect, null);
         }
