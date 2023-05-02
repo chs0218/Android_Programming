@@ -6,8 +6,12 @@ import android.graphics.RectF;
 
 import com.example.cookierun.R;
 import com.example.cookierun.spgp2023.framework.interfaces.IBoxCollidable;
+import com.example.cookierun.spgp2023.framework.interfaces.IGameObject;
 import com.example.cookierun.spgp2023.framework.objects.AnimSprite;
 import com.example.cookierun.spgp2023.framework.scene.BaseScene;
+import com.example.cookierun.spgp2023.framework.view.Metrics;
+
+import java.util.ArrayList;
 
 public class Player extends AnimSprite implements IBoxCollidable {
     private final float ground;
@@ -16,22 +20,70 @@ public class Player extends AnimSprite implements IBoxCollidable {
     private static final float GRAVITY = 17.0f;
     private RectF collisionRect = new RectF();
     public Player() {
-        super(R.mipmap.cookie_player_sheet, 2.0f, 6.0f, 2.0f, 2.0f, 8, 1);
+        super(R.mipmap.cookie_player_sheet, 2.0f, 3.0f, 2.0f, 2.0f, 8, 1);
         this.ground = y;
+        fixCollisionRect();
     }
 
     public void update() {
-        if (state == State.jump || state == State.doubleJump) {
-            float dy = jumpSpeed * BaseScene.frameTime;
-            jumpSpeed += GRAVITY * BaseScene.frameTime;
-            if (y + dy >= ground) {
-                dy = ground - y;
-                state = State.running;
-            }
-            y += dy;
-            fixDstRect();
-            fixCollisionRect();
+        switch (state) {
+            case jump:
+            case doubleJump:
+            case falling:
+                float dy = jumpSpeed * BaseScene.frameTime;
+                jumpSpeed += GRAVITY * BaseScene.frameTime;
+                if (jumpSpeed >= 0) { // 낙하하고 있다면 발밑에 땅이 있는지 확인한다
+                    float foot = collisionRect.bottom;
+                    float floor = findNearestPlatformTop(foot);
+                    if (foot + dy >= floor) {
+                        dy = floor - foot;
+                        state = State.running;
+                    }
+                }
+                y += dy;
+//                fixDstRect();
+                dstRect.offset(0, dy);
+                fixCollisionRect();
+                break;
+            case running:
+            case slide:
+                float foot = collisionRect.bottom;
+                float floor = findNearestPlatformTop(foot);
+                if (foot < floor) {
+                    state = State.falling;
+                    jumpSpeed = 0;
+                }
         }
+    }
+
+    private float findNearestPlatformTop(float foot) {
+        Platform platform = findNearestPlatform(foot);
+        if (platform == null) return Metrics.game_height;
+        return platform.getCollisionRect().top;
+    }
+
+    private Platform findNearestPlatform(float foot) {
+        Platform nearest = null;
+        MainScene scene = (MainScene) BaseScene.getTopScene();
+        ArrayList<IGameObject> platforms = scene.getObjectsAt(MainScene.Layer.platform);
+        float top = Metrics.game_height;
+        for (IGameObject obj: platforms) {
+            Platform platform = (Platform) obj;
+            RectF rect = platform.getCollisionRect();
+            if (rect.left > x || x > rect.right) {
+                continue;
+            }
+            //Log.d(TAG, "foot:" + foot + " platform: " + rect);
+            if (rect.top < foot) {
+                continue;
+            }
+            if (top > rect.top) {
+                top = rect.top;
+                nearest = platform;
+            }
+            //Log.d(TAG, "top=" + top + " gotcha:" + platform);
+        }
+        return nearest;
     }
 
     private void fixCollisionRect() {
@@ -44,20 +96,22 @@ public class Player extends AnimSprite implements IBoxCollidable {
     }
 
     protected enum State {
-        running, jump, doubleJump, falling, COUNT
+        running, jump, doubleJump, falling, slide, COUNT
     }
     protected static Rect[][] srcRects = {
             makeRects(100, 101, 102, 103), // State.running
             makeRects(7, 8),               // State.jump
             makeRects(1, 2, 3, 4),         // State.doubleJump
             makeRects(0),                  // State.falling
+            makeRects(9, 10),              // State.slide
     };
 
     protected static float[][] edgeInsetRatios = {
-            { 0.1f, 0.0f, 0.1f, 0.0f }, // State.running
-            { 0.1f, 0.2f, 0.1f, 0.0f }, // State.jump
-            { 0.2f, 0.2f, 0.2f, 0.0f }, // State.doubleJump
-            { 0.2f, 0.0f, 0.2f, 0.0f }, // State.falling
+            { 0.1f, 0.01f, 0.1f, 0.0f }, // State.running
+            { 0.1f, 0.20f, 0.1f, 0.0f }, // State.jump
+            { 0.2f, 0.20f, 0.2f, 0.0f }, // State.doubleJump
+            { 0.2f, 0.01f, 0.2f, 0.0f }, // State.falling
+            { 0.00f, 0.50f, 0.00f, 0.00f }, // slide
     };
 
     protected static Rect[] makeRects(int... indices) {
@@ -88,6 +142,29 @@ public class Player extends AnimSprite implements IBoxCollidable {
         } else if (state == State.jump) {
             jumpSpeed = -JUMP_POWER;
             state = State.doubleJump;
+        }
+    }
+
+    public void fall() {
+        if (state != State.running) return;
+        float foot = collisionRect.bottom;
+        Platform platform = findNearestPlatform(foot);
+        if (platform == null) return;
+        if (!platform.canPass()) return;
+        state = State.falling;
+        dstRect.offset(0, 0.001f);
+        collisionRect.offset(0, 0.001f);
+        jumpSpeed = 0;
+    }
+
+    public void slide(boolean startsSlide) {
+        if (state == State.running && startsSlide) {
+            state = State.slide;
+            return;
+        }
+        if (state == State.slide && !startsSlide) {
+            state = State.running;
+            return;
         }
     }
 

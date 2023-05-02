@@ -11,6 +11,7 @@ import com.example.cookierun.BuildConfig;
 import com.example.cookierun.spgp2023.framework.interfaces.IBoxCollidable;
 import com.example.cookierun.spgp2023.framework.interfaces.IGameObject;
 import com.example.cookierun.spgp2023.framework.interfaces.IRecyclable;
+import com.example.cookierun.spgp2023.framework.interfaces.ITouchable;
 
 import java.util.ArrayList;
 
@@ -132,7 +133,21 @@ public class BaseScene {
         return layers.get(layerEnum.ordinal());
     }
     public boolean onTouchEvent(MotionEvent event) {
+        int touchLayer = getTouchLayerIndex();
+        if (touchLayer < 0) return false;
+        ArrayList<IGameObject> gameObjects = layers.get(touchLayer);
+        for (IGameObject gobj : gameObjects) {
+            if (!(gobj instanceof ITouchable)) {
+                continue;
+            }
+            boolean processed = ((ITouchable) gobj).onTouchEvent(event);
+            if (processed) return true;
+        }
         return false;
+    }
+
+    protected int getTouchLayerIndex() {
+        return -1;
     }
 
     public boolean clipsRect() {

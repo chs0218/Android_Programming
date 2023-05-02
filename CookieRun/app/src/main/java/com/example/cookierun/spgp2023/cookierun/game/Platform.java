@@ -6,6 +6,11 @@ import com.example.cookierun.spgp2023.framework.scene.RecycleBin;
 import java.util.Random;
 
 public class Platform extends MapObject {
+    private Type type;
+
+    public boolean canPass() {
+        return type != Type.T_10x2;
+    }
     public enum Type {
         T_10x2, T_2x2, T_3x1, COUNT;
 
@@ -46,6 +51,7 @@ public class Platform extends MapObject {
     }
 
     public void init(Type type, float left, float top) {
+        this.type = type;
         setBitmapResource(type.resId());
         width = type.width();
         height = type.height();
