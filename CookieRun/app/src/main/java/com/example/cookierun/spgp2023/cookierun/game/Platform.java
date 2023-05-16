@@ -9,7 +9,7 @@ public class Platform extends MapObject {
     private Type type;
 
     public boolean canPass() {
-        return type != Type.T_10x2;
+        return type == Type.T_3x1;
     }
     public enum Type {
         T_10x2, T_2x2, T_3x1, COUNT;
@@ -39,8 +39,11 @@ public class Platform extends MapObject {
     }
 
     private Platform() {
+        super(MainScene.Layer.platform);
     }
-
+    public static Platform get(int type, float left, float top) {
+        return get(Type.values()[type], left, top);
+    }
     public static Platform get(Type type, float left, float top) {
         Platform platform = (Platform) RecycleBin.get(Platform.class);
         if (platform == null) {
@@ -58,12 +61,6 @@ public class Platform extends MapObject {
         // Platform 은 x,y 를 사용하지 않고 dstRect 만을 사용하도록 한다.
         dstRect.set(left, top, left + width, top + height);
     }
-
-    @Override
-    protected MainScene.Layer getLayer() {
-        return MainScene.Layer.platform;
-    }
-
     public String toString() {
         return getClass().getSimpleName() + "@" + System.identityHashCode(this) + "(" + width + "x" + height + ")";
     }

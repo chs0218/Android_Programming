@@ -1,42 +1,105 @@
 package com.example.cookierun.spgp2023.cookierun.game;
 
+import android.content.Context;
+import android.content.res.AssetManager;
 import android.graphics.Canvas;
+import android.util.JsonReader;
 
 import com.example.cookierun.spgp2023.framework.interfaces.IGameObject;
 import com.example.cookierun.spgp2023.framework.scene.BaseScene;
 import com.example.cookierun.spgp2023.framework.view.Metrics;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Random;
 
 public class MapLoader implements IGameObject {
     private static final String TAG = MapLoader.class.getSimpleName();
     private Random random = new Random();
-    private float platformX, itemX;
+    private float x;
+    private int index, mapLength;
+    private int columns;
+    private ArrayList<String> lines = new ArrayList<>();
+
+    public MapLoader(Context context, int stage) {
+        loadStage(context, stage);
+    }
+
+    public static final int STAGE_HEIGHT = 9;
+    private void loadStage(Context context, int stage) {
+        AssetManager assets = context.getAssets();
+        try {
+            String file = String.format("stage_%02d.txt", stage);
+            InputStream is = assets.open(file);
+            InputStreamReader isr = new InputStreamReader(is);
+            BufferedReader reader = new BufferedReader(isr);
+            String line = reader.readLine();
+            lines.add(line);
+            columns = line.indexOf('|');
+            if (columns <= 0) return;
+
+            while (true) {
+                line = reader.readLine();
+                if (line == null) break;
+                lines.add(line);
+            }
+
+            int pages = lines.size() / STAGE_HEIGHT;
+            int lastCol = lines.get(lines.size() - 1).length();
+            mapLength = (pages - 1) * columns + lastCol;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
     @Override
     public void update() {
-        MainScene scene = (MainScene) BaseScene.getTopScene();
-        platformX -= MapObject.SPEED * BaseScene.frameTime;
-        while (platformX < Metrics.game_width) {
-            Platform platform = Platform.get(Platform.Type.random(random), platformX, 7);
-            scene.add(MainScene.Layer.platform, platform);
-            platformX += platform.getWidth();
+        x -= MapObject.SPEED * BaseScene.frameTime;
+        float left = x + index;
+        while (left < Metrics.game_width) {
+            createColumn(left);
+            index++;
+            left += 1.0f;
         }
-        itemX -= MapObject.SPEED * BaseScene.frameTime;
-        while (itemX < Metrics.game_width) {
-            int y = random.nextInt(6) + 1;
-            int count = 3;
-            if (y < 5) {
-                Platform platform = Platform.get(Platform.Type.T_3x1, itemX, y+1);
-                scene.add(MainScene.Layer.platform, platform);
-            } else {
-                count = random.nextInt(5) + 1;
-            }
-            for (int i = 0; i < count; i++) {
-                int y2 = y -= random.nextInt(2);
-                JellyItem jellyItem = JellyItem.get(JellyItem.getRandomIndex(random), itemX, y2);
-                scene.add(MainScene.Layer.item, jellyItem);
-                itemX += jellyItem.getWidth();
-            }
+    }
+
+    private void createColumn(float left) {
+        for (int row = 0; row < STAGE_HEIGHT; row++) {
+            int tile = getAt(index, row);
+            createObject(tile, left, row);
+        }
+    }
+
+    private void createObject(int tile, float left, int top) {
+        MainScene scene = (MainScene) BaseScene.getTopScene();
+        MapObject mobj = null;
+        if ('1' <= tile && tile <= '9') {
+            mobj = JellyItem.get(tile - 1, left, top);
+        } else if ('O' <= tile && tile <= 'Q') {
+            mobj = Platform.get(tile - 'O', left, top);
+        } else switch (tile) {
+            case 'X': case 'Y': case 'Z':
+                mobj = Obstacle.get(tile - 'X', left, top);
+                break;
+            case 'W':
+                mobj = Obstacle.get(3, left, top);
+                break;
+        }
+
+        if (mobj != null) {
+            scene.add(mobj.layer, mobj);
+        }
+    }
+
+    private int getAt(int col, int row) {
+        try {
+            int lineIndex = col / columns * STAGE_HEIGHT + row;
+            String line = lines.get(lineIndex);
+            return line.charAt(col % columns);
+        } catch (Exception e) {
+            return 0;
         }
     }
 

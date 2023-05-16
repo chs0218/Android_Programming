@@ -6,6 +6,10 @@ android {
     namespace 'com.example.cookierun'
     compileSdk 33
 
+    viewBinding {
+        enabled = true
+    }
+
     defaultConfig {
         applicationId "com.example.cookierun"
         minSdk 22

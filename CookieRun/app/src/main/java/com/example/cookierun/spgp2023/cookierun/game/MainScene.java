@@ -1,11 +1,10 @@
 package com.example.cookierun.spgp2023.cookierun.game;
 
-import android.util.Log;
-import android.view.MotionEvent;
+import android.content.Context;
 
 import com.example.cookierun.R;
 import com.example.cookierun.spgp2023.framework.objects.Button;
-import com.example.cookierun.spgp2023.framework.objects.Sprite;
+import com.example.cookierun.spgp2023.framework.res.Sound;
 import com.example.cookierun.spgp2023.framework.scene.BaseScene;
 import com.example.cookierun.spgp2023.framework.view.Metrics;
 
@@ -15,9 +14,9 @@ public class MainScene extends BaseScene {
     private static final String TAG = MainScene.class.getSimpleName();
     private final Player player;
     public enum Layer {
-        bg, platform, item, player, ui, touch, controller, COUNT
+        bg, platform, item, obstacle, player, ui, touch, controller, COUNT
     }
-    public MainScene() {
+    public MainScene(Context context, int stage) {
         Metrics.setGameSize(16.0f, 9.0f);
         initLayers(Layer.COUNT);
 
@@ -31,6 +30,7 @@ public class MainScene extends BaseScene {
         add(Layer.touch, new Button(R.mipmap.btn_slide_n, 1.5f, 8.0f, 2.0f, 0.75f, new Button.Callback() {
             @Override
             public boolean onTouch(Button.Action action) {
+                //Log.d(TAG, "Button: Slide");
                 player.slide(action == Button.Action.pressed);
                 return true;
             }
@@ -41,6 +41,7 @@ public class MainScene extends BaseScene {
                 if (action == Button.Action.pressed) {
                     player.jump();
                 }
+                //Log.d(TAG, "Button: Jump");
                 return true;
             }
         }));
@@ -50,14 +51,31 @@ public class MainScene extends BaseScene {
                 if (action == Button.Action.pressed) {
                     player.fall();
                 }
+                //Log.d(TAG, "Button: Fall");
                 return true;
             }
         }));
-
-        add(Layer.controller, new MapLoader());
+        add(Layer.controller, new MapLoader(context, stage));
         add(Layer.controller, new CollisionChecker(player));
     }
+    @Override
+    protected void onStart() {
+        Sound.playMusic(R.raw.main);
+    }
 
+    @Override
+    protected void onEnd() {
+        Sound.stopMusic();
+    }
+    @Override
+    protected void onPause() {
+        Sound.pauseMusic();
+    }
+
+    @Override
+    protected void onResume() {
+        Sound.resumeMusic();
+    }
 //    @Override
 //    public boolean onTouchEvent(MotionEvent event) {
 //        if (event.getAction() == MotionEvent.ACTION_DOWN) {
@@ -65,6 +83,7 @@ public class MainScene extends BaseScene {
 //        }
 //        return super.onTouchEvent(event);
 //    }
+
     @Override
     protected int getTouchLayerIndex() {
         return Layer.touch.ordinal();

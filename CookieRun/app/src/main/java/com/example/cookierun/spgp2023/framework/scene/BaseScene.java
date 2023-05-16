@@ -35,12 +35,21 @@ public class BaseScene {
     }
     public int pushScene() {
         stack.add(this);
+        this.onStart();
         return stack.size();
     }
 
     public void popScene(){
         stack.remove(this);
+        this.onEnd();
         // TODO: additional callback should be called
+    }
+    public void pauseScene() {
+        onPause();
+    }
+
+    public void resumeScene() {
+        onResume();
     }
     protected <E extends Enum<E>> void initLayers(E countEnum) {
         int layerCount = countEnum.ordinal();
@@ -152,5 +161,14 @@ public class BaseScene {
 
     public boolean clipsRect() {
         return true;
+    }
+
+    protected void onStart() {
+    }
+    protected void onEnd() {
+    }
+    protected void onPause() {
+    }
+    protected void onResume() {
     }
 }

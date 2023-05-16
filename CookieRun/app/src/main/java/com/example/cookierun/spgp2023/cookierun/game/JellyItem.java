@@ -17,8 +17,21 @@ public class JellyItem extends MapObject {
     public static final float INSET = 0.20f;
     protected Rect srcRect = new Rect();
     protected RectF collisionRect = new RectF();
+    public int index;
+    protected int[] SOUND_IDS = {
+            R.raw.jelly,
+            R.raw.jelly_alphabet,
+            R.raw.jelly_item,
+            R.raw.jelly_gold,
+            R.raw.jelly_coin,
+            R.raw.jelly_big_coin,
+    };
+    public int soundId() {
+        return SOUND_IDS[index % SOUND_IDS.length];
+    }
 
     JellyItem() {
+        super(MainScene.Layer.item);
         setBitmapResource(R.mipmap.jelly);
         width = height = 1;
     }
@@ -37,6 +50,7 @@ public class JellyItem extends MapObject {
     }
 
     private void init(int index, float left, float top) {
+        this.index = index;
         setSrcRect(index);
         dstRect.set(left, top, left + width, top + height);
     }
@@ -67,9 +81,5 @@ public class JellyItem extends MapObject {
     @Override
     public RectF getCollisionRect() {
         return collisionRect;
-    }
-    @Override
-    protected MainScene.Layer getLayer() {
-        return MainScene.Layer.item;
     }
 }
